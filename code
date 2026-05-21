@@ -1,0 +1,50 @@
+#define TRIG_PIN 4
+#define ECHO_PIN 5
+#define BUZZER_PIN 6
+
+#define THRESHOLD_CM 30
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+}
+
+long getDistance() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  long duration = pulseIn(ECHO_PIN, HIGH, 30000);
+  if (duration == 0) return -1;
+
+  long distance = duration * 0.034 / 2;
+  return distance;
+}
+
+void loop() {
+  long dist = getDistance();
+
+  if (dist == -1) {
+    Serial.println("No object detected (out of range)");
+    digitalWrite(BUZZER_PIN, LOW);  // silent
+  } 
+  else {
+    Serial.print("Distance: ");
+    Serial.print(dist);
+    Serial.println(" cm");
+
+    if (dist < THRESHOLD_CM) {
+      digitalWrite(BUZZER_PIN, HIGH);  // continuous beep ✅
+    } 
+    else {
+      digitalWrite(BUZZER_PIN, LOW);   // silent
+    }
+  }
+
+  delay(100);
+}
